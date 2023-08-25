@@ -20,7 +20,7 @@ public interface StatsRepository extends JpaRepository<Hit, Long> {
             "   end as hits) " +
             "from Hit as h " +
             "where h.created between ?1 and ?2 " +
-            "   and (?3 is null or h.uri in (?3))" +
+            "   and (coalesce(?3, null) is null or h.uri in (?3))" +
             "group by " +
             "   h.app," +
             "   h.uri")
