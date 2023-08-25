@@ -6,7 +6,7 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-public class Stat {
+public class Stats {
     private String app;
     private String uri;
     private Long hits;

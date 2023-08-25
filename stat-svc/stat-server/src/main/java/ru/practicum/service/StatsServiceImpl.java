@@ -3,7 +3,7 @@ package ru.practicum.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.model.Hit;
-import ru.practicum.model.Stat;
+import ru.practicum.model.Stats;
 import ru.practicum.repository.StatsRepository;
 
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public Collection<Stat> getStats(LocalDateTime start, LocalDateTime end, Collection<String> uris, boolean unique) {
+    public Collection<Stats> getStats(LocalDateTime start, LocalDateTime end, Collection<String> uris, boolean unique) {
         return statsRepository.findAllByCreatedBetweenAndUriInAndUnique(start, end, uris, unique);
     }
 }
