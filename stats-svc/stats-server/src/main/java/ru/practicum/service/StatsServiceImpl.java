@@ -8,6 +8,7 @@ import ru.practicum.repository.StatsRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public Collection<Stats> getStats(LocalDateTime start, LocalDateTime end, Collection<String> uris, boolean unique) {
+    public Collection<Stats> getStats(LocalDateTime start, LocalDateTime end, Set<String> uris, boolean unique) {
         return statsRepository.findAllByCreatedBetweenAndUriInAndUnique(start, end, uris, unique);
     }
 }
