@@ -30,11 +30,11 @@ public class StatsController {
 
     @GetMapping("/stats")
     public Collection<StatsDto> getStats(@RequestParam
-                                        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
+                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
                                          @RequestParam
-                                        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
                                          @RequestParam(required = false) Set<String> uris,
-                                         @RequestParam(required = false, defaultValue = "false") boolean unique) {
+                                         @RequestParam(defaultValue = "false") boolean unique) {
         return statsMapper.mapToStatDto(statsService.getStats(start, end, uris, unique));
     }
 }
