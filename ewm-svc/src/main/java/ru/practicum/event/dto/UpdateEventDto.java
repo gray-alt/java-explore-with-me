@@ -3,7 +3,6 @@ package ru.practicum.event.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
-import ru.practicum.event.model.EventState;
 import ru.practicum.event.model.EventStateAction;
 import ru.practicum.location.dto.LocationDto;
 

@@ -10,7 +10,6 @@ import ru.practicum.eventRequest.model.EventRequest;
 import ru.practicum.eventRequest.model.EventRequestStatus;
 import ru.practicum.eventRequest.model.EventRequestUpdateResult;
 import ru.practicum.eventRequest.repository.EventRequestRepository;
-import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.model.User;
@@ -98,7 +97,7 @@ public class EventRequestServiceImpl implements EventRequestService {
         }
 
         if (request.getStatus() == EventRequestStatus.CONFIRMED) {
-            if (foundEvent.getParticipantLimit() == 0 || foundEvent.getRequestModeration() == false) {
+            if (foundEvent.getParticipantLimit() == 0 || !foundEvent.getRequestModeration()) {
                 return new EventRequestUpdateResult(eventRequests, new ArrayList<>());
             }
 

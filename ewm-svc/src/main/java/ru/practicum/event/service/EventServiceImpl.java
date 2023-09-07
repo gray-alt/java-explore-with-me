@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.category.service.CategoryService;
 import ru.practicum.event.model.*;
 import ru.practicum.event.repository.EventRepository;
-import ru.practicum.eventRequest.model.EventRequestStatus;
 import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ForbiddenException;

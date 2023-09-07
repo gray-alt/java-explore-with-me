@@ -5,8 +5,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.location.model.Location;
 import ru.practicum.location.repository.LocationRepository;
 
-import java.util.Optional;
-
 @AllArgsConstructor
 @Service
 public class LocationServiceImpl implements LocationService {

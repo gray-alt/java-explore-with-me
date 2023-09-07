@@ -3,7 +3,6 @@ package ru.practicum.event.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import ru.practicum.location.dto.LocationDto;
 
 import javax.validation.constraints.Future;

@@ -1,7 +1,6 @@
 package ru.practicum.category.model;
 
 import lombok.*;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.persistence.*;
 
