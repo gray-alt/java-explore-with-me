@@ -1,6 +1,10 @@
+package ru.practicum;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import ru.practicum.BaseClient;
 import ru.practicum.HitDto;
 
 import java.time.LocalDateTime;

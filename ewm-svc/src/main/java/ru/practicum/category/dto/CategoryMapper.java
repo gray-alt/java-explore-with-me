@@ -12,6 +12,15 @@ public class CategoryMapper {
         return new Category(categoryDto.getId(), categoryDto.getName());
     }
 
+    public static Category mapToCategory(Long id) {
+        if (id == null) {
+            return null;
+        }
+        return Category.builder()
+                .id(id)
+                .build();
+    }
+
     public static Category mapToCategory(Long id, CategoryDto categoryDto) {
         return new Category(id, categoryDto.getName());
     }

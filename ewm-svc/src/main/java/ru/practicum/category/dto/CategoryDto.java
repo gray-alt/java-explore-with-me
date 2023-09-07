@@ -13,4 +13,12 @@ public class CategoryDto {
     @NotBlank
     @Length(min = 1, max = 50)
     private final String name;
+
+    @Override
+    public String toString() {
+        return "CategoryDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

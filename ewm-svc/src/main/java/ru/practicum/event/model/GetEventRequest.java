@@ -25,10 +25,12 @@ public class GetEventRequest {
     private int from;
     private int size;
 
+    private String ip;
+
     public static GetEventRequest of(Collection<Long> userIds, Collection<EventState> states,
                                      Collection<Long> categoryIds, LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                      String text, Boolean paid, Boolean available, EventSort sort,
-                                     int from, int size) {
+                                     int from, int size, String ip) {
         GetEventRequest request = new GetEventRequest();
         request.setUserIds(userIds);
         request.setStates(states);
@@ -41,6 +43,7 @@ public class GetEventRequest {
         request.setSort(sort);
         request.setFrom(from);
         request.setSize(size);
+        request.setIp(ip);
         return request;
     }
 
@@ -58,5 +61,22 @@ public class GetEventRequest {
 
     public boolean hasRange() {
         return rangeStart != null || rangeEnd != null;
+    }
+
+    @Override
+    public String toString() {
+        return "GetEventRequest{" +
+                "userIds=" + userIds +
+                ", states=" + states +
+                ", categoryIds=" + categoryIds +
+                ", rangeStart=" + rangeStart +
+                ", rangeEnd=" + rangeEnd +
+                ", text='" + text + '\'' +
+                ", paid=" + paid +
+                ", available=" + available +
+                ", sort=" + sort +
+                ", from=" + from +
+                ", size=" + size +
+                '}';
     }
 }

@@ -26,5 +26,5 @@ public class Compilation {
     private Collection<Event> events;
     @Column(name = "is_pinned")
     private Boolean pinned;
-    private String tittle;
+    private String title;
 }

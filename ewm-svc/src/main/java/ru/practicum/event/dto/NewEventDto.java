@@ -3,6 +3,7 @@ package ru.practicum.event.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import ru.practicum.location.dto.LocationDto;
 
 import javax.validation.constraints.Future;
@@ -17,7 +18,7 @@ public class NewEventDto {
     @Length(min = 20, max = 2000)
     private final String annotation;
     @NotNull
-    private final long category;
+    private final Long category;
     @NotBlank
     @Length(min = 20, max = 7000)
     private final String description;
@@ -26,13 +27,25 @@ public class NewEventDto {
     private final LocalDateTime eventDate;
     @NotNull
     private final LocationDto location;
-    @NotNull
-    private final Boolean paid;
-    @NotNull
-    private final Integer participantLimit;
-    @NotNull
-    private final boolean requestModeration;
+    private final boolean paid;
+    private final long participantLimit;
+    private final Boolean requestModeration;
     @NotBlank
     @Length(min = 3, max = 120)
     private final String title;
+
+    @Override
+    public String toString() {
+        return "NewEventDto{" +
+                "annotation='" + annotation + '\'' +
+                ", category=" + category +
+                ", description='" + description + '\'' +
+                ", eventDate=" + eventDate +
+                ", location=" + location +
+                ", paid=" + paid +
+                ", participantLimit=" + participantLimit +
+                ", requestModeration=" + requestModeration +
+                ", title='" + title + '\'' +
+                '}';
+    }
 }

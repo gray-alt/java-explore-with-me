@@ -2,7 +2,6 @@ package ru.practicum.event.model;
 
 import lombok.*;
 import ru.practicum.category.model.Category;
-import ru.practicum.eventRequest.model.EventRequestStatus;
 import ru.practicum.location.model.Location;
 import ru.practicum.user.model.User;
 
@@ -39,21 +38,37 @@ public class Event {
     @Column(name = "is_paid")
     private Boolean paid;
     @Column(name = "participant_limit")
-    private Integer participantLimit;
+    private Long participantLimit;
     @Column(name = "published_date")
     private LocalDateTime publishedOn;
     @Column(name = "request_moderation")
     private Boolean requestModeration;
     @Enumerated(value = EnumType.STRING)
     private EventState state;
+    @Transient
+    private EventStateAction stateAction;
     private String title;
     private int views;
     @ElementCollection
     @CollectionTable(name = "requests", joinColumns = @JoinColumn(name = "event_id"))
     @Column(name = "status")
-    private Set<EventRequestStatus> eventRequests;
+    private Set<String> eventRequests;
+    @ElementCollection
+    @CollectionTable(name = "events_views", joinColumns = @JoinColumn(name = "event_id"))
+    @Column(name = "ip")
+    private Set<String> ipViews;
 
     public long getConfirmedRequestsCount() {
-        return eventRequests.stream().filter(s -> s.equals(EventRequestStatus.CONFIRMED)).count();
+        if (eventRequests == null || eventRequests.isEmpty()) {
+            return 0;
+        }
+        return eventRequests.stream().filter(s -> s.equals("CONFIRMED")).count();
+    }
+
+    public int getEventViews() {
+        if (ipViews == null || ipViews.isEmpty()) {
+            return  0;
+        }
+        return ipViews.size();
     }
 }

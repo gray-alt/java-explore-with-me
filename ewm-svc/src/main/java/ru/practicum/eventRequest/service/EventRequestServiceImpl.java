@@ -3,6 +3,7 @@ package ru.practicum.eventRequest.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.event.model.Event;
+import ru.practicum.event.model.EventState;
 import ru.practicum.event.service.EventService;
 import ru.practicum.eventRequest.dto.EventRequestStatusUpdateRequestDto;
 import ru.practicum.eventRequest.model.EventRequest;
@@ -34,19 +35,23 @@ public class EventRequestServiceImpl implements EventRequestService {
             throw new ConflictException("Can't add repeated request");
         }
 
-        Event event = eventService.getPublicEventById(eventId);
+        Event event = eventService.getEventById(eventId);
         if (event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("Initiator can't make request");
         }
 
-        if (event.getConfirmedRequestsCount() == event.getParticipantLimit()) {
+        if (event.getState() != EventState.PUBLISHED) {
+            throw new ConflictException("Event with id=" + eventId + " is not published yet");
+        }
+
+        if (event.getParticipantLimit() != 0 && event.getConfirmedRequestsCount() == event.getParticipantLimit()) {
             throw new ConflictException("The limit of participants has been reached");
         }
 
         User user = userService.getUserById(userId);
         EventRequestStatus status = EventRequestStatus.PENDING;
 
-        if (event.getRequestModeration() == false || event.getParticipantLimit() == 0) {
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             status = EventRequestStatus.CONFIRMED;
         }
 
@@ -69,7 +74,7 @@ public class EventRequestServiceImpl implements EventRequestService {
     public EventRequest cancelEventRequest(Long userId, Long requestId) {
         EventRequest request = eventRequestRepository.findByIdAndRequesterId(requestId, userId).orElseThrow(
                 () -> new NotFoundException("Request with id=" + requestId + " was not found"));
-        request.setStatus(EventRequestStatus.REJECTED);
+        request.setStatus(EventRequestStatus.CANCELED);
         return eventRequestRepository.save(request);
     }
 
@@ -81,7 +86,7 @@ public class EventRequestServiceImpl implements EventRequestService {
     @Override
     public EventRequestUpdateResult confirmEventRequests(Long userId, Long eventId,
                                                          EventRequestStatusUpdateRequestDto request) {
-        Event foundEvent = eventService.getPublicEventById(eventId);
+        Event foundEvent = eventService.getPublicEventById(eventId, null);
 
         Set<Long> exodusIds = request.getRequestIds();
         Collection<EventRequest> eventRequests = eventRequestRepository.findAllByEventIdAndEventInitiatorIdAndIdIn(
@@ -117,7 +122,7 @@ public class EventRequestServiceImpl implements EventRequestService {
             }
 
             if (e.getStatus() != EventRequestStatus.PENDING) {
-                throw new BadRequestException("Request must have status PENDING");
+                throw new ConflictException("Request must have status PENDING");
             }
 
             e.setStatus(newStatus);

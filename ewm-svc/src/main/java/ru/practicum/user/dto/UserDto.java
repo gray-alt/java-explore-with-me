@@ -20,4 +20,13 @@ public class UserDto {
     @Email
     @Length(min = 6, max = 254)
     private final String email;
+
+    @Override
+    public String toString() {
+        return "UserDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
 }

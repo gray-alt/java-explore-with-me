@@ -12,7 +12,7 @@ public class CompilationMapper {
                 .id(compilation.getId())
                 .events(EventMapper.mapToEventShortDto(compilation.getEvents()))
                 .pinned(compilation.getPinned())
-                .tittle(compilation.getTittle())
+                .title(compilation.getTitle())
                 .build();
     }
 

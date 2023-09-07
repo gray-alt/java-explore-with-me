@@ -2,6 +2,7 @@ package ru.practicum.event.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -9,29 +10,35 @@ import ru.practicum.category.service.CategoryService;
 import ru.practicum.event.model.*;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.eventRequest.model.EventRequestStatus;
+import ru.practicum.exception.BadRequestException;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.location.service.LocationService;
 import ru.practicum.user.service.UserService;
 
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @AllArgsConstructor
+@Slf4j
 @Service
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserService userService;
     private final CategoryService categoryService;
+    private final LocationService locationService;
 
     @Override
     public Event addEvent(Long userId, Event event) {
         checkEventDate(event.getEventDate(), LocalDateTime.now().plusHours(2));
         event.setInitiator(userService.getUserById(userId));
         event.setCategory(categoryService.getCategoryById(event.getCategory().getId()));
-        return eventRepository.save(event);
+        event.setLocation(locationService.getLocation(event.getLocation()));
+        event = eventRepository.save(event);
+        log.info("Added event " + event.getTitle() + " with id=" + event.getId());
+        return event;
     }
 
     @Override
@@ -48,19 +55,21 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Event updateEvent(Long userId, Long eventId, Event event) {
+    public Event updateEventByInitiator(Long userId, Long eventId, Event event) {
         Event foundEvent = getEventByUserIdAndId(userId, eventId);
 
         // Изменять можно только не опубликованные события
         if (foundEvent.getState() == EventState.PUBLISHED) {
-            throw new ForbiddenException("Only pending or canceled events can be changed");
+            throw new ConflictException("Only pending or canceled events can be changed");
         }
 
         // Дата события должна быть не ранее чем за два часа до изменения
-        checkEventDate(event.getEventDate(), LocalDateTime.now().plusHours(2));
+        checkEventDate(foundEvent.getEventDate(), LocalDateTime.now().plusHours(2));
 
         updateEvent(foundEvent, event);
-        return eventRepository.save(foundEvent);
+        foundEvent = eventRepository.save(foundEvent);
+        log.info("Updated event with id=" + foundEvent.getId() + ", " + foundEvent);
+        return foundEvent;
     }
 
     @Override
@@ -72,19 +81,21 @@ public class EventServiceImpl implements EventService {
         checkEventDate(foundEvent.getEventDate(), LocalDateTime.now().plusHours(1));
 
         // Публикация события не в статусе Ожидания публикации
-        if (event.getState() == EventState.PUBLISHED && foundEvent.getState() != EventState.SEND_TO_REVIEW) {
-            throw new ForbiddenException("Cannot publish the event because it's not in the right state: " +
+        if (event.getStateAction() == EventStateAction.PUBLISH_EVENT && foundEvent.getState() != EventState.PENDING) {
+            throw new ConflictException("Cannot publish the event because it's not in the right state: " +
                     foundEvent.getState());
         }
 
         // Отклонить можно событие, которе ещё не опубликовано
-        if (event.getState() == EventState.CANCEL_REVIEW && foundEvent.getState() == EventState.PUBLISHED) {
-            throw new ForbiddenException("Cannot cancel the event because it's not in the right state: " +
+        if (event.getStateAction() == EventStateAction.REJECT_EVENT && foundEvent.getState() == EventState.PUBLISHED) {
+            throw new ConflictException("Cannot cancel the event because it's not in the right state: " +
                     foundEvent.getState());
         }
 
         updateEvent(foundEvent, event);
-        return eventRepository.save(foundEvent);
+        foundEvent = eventRepository.save(foundEvent);
+        log.info("Admin updated event " + foundEvent.getTitle() + " with id=" + foundEvent.getId());
+        return foundEvent;
     }
 
     private void checkEventDate(LocalDateTime eventDate, LocalDateTime validDateTime) {
@@ -105,10 +116,12 @@ public class EventServiceImpl implements EventService {
             foundEvent.setDescription(event.getDescription());
         }
         if (event.getEventDate() != null) {
+            // Новая дата должна быть в будущем
+            checkEventDate(event.getEventDate(), LocalDateTime.now().plusHours(2));
             foundEvent.setEventDate(event.getEventDate());
         }
         if (event.getLocation() != null) {
-            foundEvent.setLocation(event.getLocation());
+            foundEvent.setLocation(locationService.getLocation(event.getLocation()));
         }
         if (event.getPaid() != null) {
             foundEvent.setPaid(event.getPaid());
@@ -119,11 +132,23 @@ public class EventServiceImpl implements EventService {
         if (event.getRequestModeration() != null) {
             foundEvent.setRequestModeration(event.getRequestModeration());
         }
-        if (event.getState() != null) {
-            foundEvent.setState(event.getState());
-        }
         if (event.getTitle() != null) {
             foundEvent.setTitle(event.getTitle());
+        }
+        foundEvent.setState(getEvenStateByEventStateAction(event.getStateAction(), foundEvent.getState()));
+    }
+
+    private EventState getEvenStateByEventStateAction(EventStateAction stateAction, EventState defaultState) {
+        if (stateAction == null) {
+            return defaultState;
+        }
+        switch (stateAction) {
+            case REJECT_EVENT:
+            case CANCEL_REVIEW:
+                return EventState.CANCELED;
+            case PUBLISH_EVENT: return EventState.PUBLISHED;
+            case SEND_TO_REVIEW: return EventState.PENDING;
+            default: return defaultState;
         }
     }
 
@@ -151,21 +176,32 @@ public class EventServiceImpl implements EventService {
         if (request.getPaid() != null) {
             conditions.add(event.paid.eq(request.getPaid()));
         }
-        if (request.getAvailable() != null) {
-            conditions.add(event.eventRequests.any().eq(EventRequestStatus.CONFIRMED).count().lt(event.participantLimit));
+        if (request.getAvailable() != null && request.getAvailable()) {
+            conditions.add(event.eventRequests.any().eq("CONFIRMED").count().lt(event.participantLimit));
         }
-
-        BooleanExpression finalCondition = conditions.stream().reduce(BooleanExpression::and).get();
 
         int page = request.getFrom() > 0 ? request.getFrom() / request.getSize() : 0;
         Sort sort = makePageSort(request.getSort());
         PageRequest pageRequest = PageRequest.of(page, request.getSize(), sort);
 
-        return eventRepository.findAll(finalCondition, pageRequest).toList();
+        List<Event> events;
+        if (conditions.isEmpty()) {
+             events = eventRepository.findAll(pageRequest).toList();
+        } else {
+            BooleanExpression finalCondition = conditions.stream().reduce(BooleanExpression::and).get();
+            events = eventRepository.findAll(finalCondition, pageRequest).toList();
+        }
+        for (Event e : events) {
+            updateEventViews(e, request.getIp());
+        }
+        return events;
     }
 
     private BooleanExpression makeEventDateCondition(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
         if (rangeStart != null && rangeEnd != null) {
+            if (rangeStart.isAfter(rangeEnd)) {
+                throw new BadRequestException("Incorrect range Start=" + rangeStart + ", End=" + rangeEnd);
+            }
             return QEvent.event.eventDate.between(rangeStart, rangeEnd);
         } else if (rangeStart != null) {
             return QEvent.event.eventDate.goe(rangeStart);
@@ -180,15 +216,35 @@ public class EventServiceImpl implements EventService {
     }
 
     private Sort makePageSort(EventSort sort) {
-        if (Objects.requireNonNull(sort) == EventSort.VIEWS) {
+        if (sort == null || sort == EventSort.VIEWS) {
             return Sort.by("views").descending();
         }
         return Sort.by("eventDate").descending();
     }
 
     @Override
-    public Event getPublicEventById(Long eventId) {
-        return eventRepository.findByIdAndState(eventId, EventState.PUBLISHED).orElseThrow(
+    public Event getPublicEventById(Long eventId, String ip) {
+        Event foundEvent = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED).orElseThrow(
+                () -> new NotFoundException("Event with id=" + eventId + " was not found"));
+        return updateEventViews(foundEvent, ip);
+    }
+
+    private Event updateEventViews(Event event, String ip) {
+        if (ip == null) {
+            return event;
+        }
+        Set<String> ipViews = event.getIpViews();
+        if (ipViews == null) {
+            ipViews = new HashSet<>();
+        }
+        ipViews.add(ip);
+        event.setIpViews(ipViews);
+        return eventRepository.save(event);
+    }
+
+    @Override
+    public Event getEventById(Long eventId) {
+        return eventRepository.findById(eventId).orElseThrow(
                 () -> new NotFoundException("Event with id=" + eventId + " was not found"));
     }
 }

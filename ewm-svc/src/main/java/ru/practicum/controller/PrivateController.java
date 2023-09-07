@@ -1,8 +1,11 @@
 package ru.practicum.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.StatsClient;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.service.EventService;
 import ru.practicum.eventRequest.dto.EventRequestMapper;
@@ -16,69 +19,81 @@ import java.util.Collection;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping
+@RequestMapping("/users")
 @Validated
+@Slf4j
 public class PrivateController {
     private final EventService eventService;
     private final EventRequestService eventRequestService;
 
     // СОБЫТИЯ
-    @PostMapping("/users/{userId}/events")
+    @PostMapping("/{userId}/events")
+    @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(@PathVariable Long userId,
                                              @RequestBody @Valid NewEventDto newEventDto) {
-
+        log.info("Private add event by userId=" + userId + ", " + newEventDto.toString());
         return EventMapper.mapToEventFullDto(
                 eventService.addEvent(userId, EventMapper.mapToEvent(newEventDto)));
     }
 
-    @GetMapping("/users/{userId}/events")
+    @GetMapping("/{userId}/events")
     public Collection<EventShortDto> getEvents(@PathVariable Long userId,
                                                @RequestParam(defaultValue = "0") int from,
                                                @RequestParam(defaultValue = "10") int size) {
+        log.info("Private get events by userId=" + userId);
         return EventMapper.mapToEventShortDto(eventService.getAllEventsByUserId(userId, from, size));
     }
 
-    @GetMapping("/users/{userId}/events/{eventId}")
+    @GetMapping("/{userId}/events/{eventId}")
     public EventFullDto getEvent(@PathVariable Long userId, @PathVariable Long eventId) {
+        log.info("Private get events by userId=" + userId + " and eventId=" + eventId);
         return EventMapper.mapToEventFullDto(eventService.getEventByUserIdAndId(userId, eventId));
     }
 
-    @PatchMapping("/users/{userId}/events/{eventId}")
+    @PatchMapping("/{userId}/events/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long userId,
                                    @PathVariable Long eventId,
-                                   @RequestBody UpdateEventDto updateEventDto) {
+                                   @RequestBody @Valid UpdateEventDto updateEventDto) {
+        log.info("Private update event by userId=" + userId + ", eventId=" + eventId + ", " + updateEventDto.toString());
         return EventMapper.mapToEventFullDto(
-                eventService.updateEvent(userId, eventId, EventMapper.mapToEvent(updateEventDto)));
+                eventService.updateEventByInitiator(userId, eventId, EventMapper.mapToEvent(updateEventDto)));
     }
 
-    @GetMapping("/users/{userId}/events/{eventId}/requests")
+    @GetMapping("/{userId}/events/{eventId}/requests")
     public Collection<EventRequestDto> getEventRequests(@PathVariable Long userId,
                                                         @PathVariable Long eventId) {
+        log.info("Private get event requests by userId=" + userId + ", eventId=" + eventId);
         return EventRequestMapper.mapToEventRequestDto(
                 eventRequestService.getEventRequestsByUserIdAndEventId(userId, eventId));
     }
 
-    @PatchMapping("/users/{userId}/events/{eventId}/requests")
+    @PatchMapping("/{userId}/events/{eventId}/requests")
     public EventRequestStatusUpdateResultDto updateEventRequestsStatus(@PathVariable Long userId,
                                                                        @PathVariable Long eventId,
                                                                        @RequestBody @Valid EventRequestStatusUpdateRequestDto requestStatusDto) {
+        log.info("Private update event request by userId=" + userId + ", eventId=" + eventId +
+                ", " + requestStatusDto.toString());
         return EventRequestMapper.mapToEventRequestStatusUpdateResultDto(
                 eventRequestService.confirmEventRequests(userId, eventId, requestStatusDto));
     }
 
     // ЗАПРОСЫ НА УЧАСТИЕ
-    @PostMapping("/users/{userId}/requests")
+    @PostMapping("/{userId}/requests")
+    @ResponseStatus(HttpStatus.CREATED)
     public EventRequestDto addRequest(@PathVariable Long userId, @RequestParam Long eventId) {
+        log.info("Private add event request: userId=" + userId + ", eventId=" + eventId);
         return EventRequestMapper.mapToEventRequestDto(eventRequestService.addEventRequest(userId, eventId));
     }
 
-    @GetMapping("/users/{userId}/requests")
+    @GetMapping("/{userId}/requests")
     public Collection<EventRequestDto> getRequests(@PathVariable Long userId) {
+        log.info("Private get event requests by userId=" + userId);
         return EventRequestMapper.mapToEventRequestDto(eventRequestService.getAllEventRequests(userId));
     }
 
-    @PatchMapping("/users/{userId}/requests/{requestId}/cancel")
+    @PatchMapping("/{userId}/requests/{requestId}/cancel")
     public EventRequestDto cancelRequest(@PathVariable Long userId, @PathVariable Long requestId) {
+        log.info("Private cancel event request by userId=" + userId + ", requestId=" + requestId);
         return EventRequestMapper.mapToEventRequestDto(eventRequestService.cancelEventRequest(userId, requestId));
     }
 }

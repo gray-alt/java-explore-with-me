@@ -12,11 +12,13 @@ public interface EventService {
 
     Event getEventByUserIdAndId(Long userId, Long eventId);
 
-    Event updateEvent(Long userId, Long eventId, Event event);
+    Event getEventById(Long eventId);
+
+    Event updateEventByInitiator(Long userId, Long eventId, Event event);
 
     Event updateEventByAdmin(Long eventId, Event event);
 
     Collection<Event> getEventsByConditions(GetEventRequest request);
 
-    Event getPublicEventById(Long eventId);
+    Event getPublicEventById(Long eventId, String ip);
 }

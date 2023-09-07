@@ -4,13 +4,23 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
 
-import java.util.Collection;
+import javax.validation.constraints.NotBlank;
+import java.util.Set;
 
 @AllArgsConstructor
 @Getter
 public class UpdateCompilationDto {
-    private final Collection<Long> events;
+    private final Set<Long> events;
     private final Boolean pinned;
     @Length(min = 1, max = 50)
-    private final String tittle;
+    private final String title;
+
+    @Override
+    public String toString() {
+        return "InputCompilationDto{" +
+                "events=" + events +
+                ", pinned=" + pinned +
+                ", title='" + title + '\'' +
+                '}';
+    }
 }

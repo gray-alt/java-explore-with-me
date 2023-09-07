@@ -11,4 +11,12 @@ import java.util.Set;
 public class EventRequestStatusUpdateRequestDto {
     private final Set<Long> requestIds;
     private final EventRequestStatus status;
+
+    @Override
+    public String toString() {
+        return "EventRequestStatusUpdateRequestDto{" +
+                "requestIds=" + requestIds +
+                ", status=" + status +
+                '}';
+    }
 }

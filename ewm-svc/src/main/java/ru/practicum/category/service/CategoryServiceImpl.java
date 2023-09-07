@@ -1,6 +1,7 @@
 package ru.practicum.category.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
@@ -12,6 +13,7 @@ import ru.practicum.exception.NotFoundException;
 import java.util.Collection;
 
 @AllArgsConstructor
+@Slf4j
 @Service
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
@@ -19,19 +21,30 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category addCategory(Category category) {
-        return categoryRepository.save(category);
+        if (categoryRepository.existsByName(category.getName())) {
+            throw new ConflictException("Category with name " + category.getName() + " is already exist");
+        }
+        category = categoryRepository.save(category);
+        log.info("Added category " + category.getName() + " with id=" + category.getId());
+        return category;
     }
 
     @Override
     public void deleteCategoryById(Long catId) {
         Category foundCategory = findAndCheckCategory(catId);
         categoryRepository.delete(foundCategory);
+        log.info("Deleted category " + foundCategory.getName() + " with id=" + foundCategory.getId());
     }
 
     @Override
     public Category renameCategory(Category category) {
-        findAndCheckCategory(category.getId());
-        return categoryRepository.save(category);
+        if (categoryRepository.existsByNameAndIdNot(category.getName(), category.getId())) {
+            throw new ConflictException("Category with name " + category.getName() + " is already exist");
+        }
+        Category foundCategory = findAndCheckCategory(category.getId());
+        foundCategory.setName(category.getName());
+        log.info("Rename category " + foundCategory.getName() + " with id=" + foundCategory.getId());
+        return categoryRepository.save(foundCategory);
     }
 
     @Override
