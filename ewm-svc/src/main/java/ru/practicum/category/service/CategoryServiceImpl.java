@@ -1,6 +1,6 @@
 package ru.practicum.category.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import ru.practicum.exception.NotFoundException;
 
 import java.util.Collection;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -25,7 +25,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new ConflictException("Category with name " + category.getName() + " is already exist");
         }
         category = categoryRepository.save(category);
-        log.info("Added category " + category.getName() + " with id=" + category.getId());
+        log.info("Added category {} with id={}", category.getName(), category.getId());
         return category;
     }
 
@@ -33,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategoryById(Long catId) {
         Category foundCategory = findAndCheckCategory(catId);
         categoryRepository.delete(foundCategory);
-        log.info("Deleted category " + foundCategory.getName() + " with id=" + foundCategory.getId());
+        log.info("Deleted category {} with id={}", foundCategory.getName(), foundCategory.getId());
     }
 
     @Override
@@ -43,7 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
         Category foundCategory = findAndCheckCategory(category.getId());
         foundCategory.setName(category.getName());
-        log.info("Rename category " + foundCategory.getName() + " with id=" + foundCategory.getId());
+        log.info("Rename category {} with id={}", foundCategory.getName(), foundCategory.getId());
         return categoryRepository.save(foundCategory);
     }
 

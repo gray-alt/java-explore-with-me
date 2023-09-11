@@ -1,6 +1,7 @@
 package ru.practicum.eventRequest.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
@@ -21,7 +22,8 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 @Service
 public class EventRequestServiceImpl implements EventRequestService {
     private final EventRequestRepository eventRequestRepository;
@@ -60,8 +62,9 @@ public class EventRequestServiceImpl implements EventRequestService {
                 .requester(user)
                 .status(status)
                 .build();
-
-        return eventRequestRepository.save(eventRequest);
+        eventRequest = eventRequestRepository.save(eventRequest);
+        log.info("Added event request with id={} on event with id={}", eventRequest.getId(), eventId);
+        return eventRequest;
     }
 
     @Override
@@ -71,10 +74,12 @@ public class EventRequestServiceImpl implements EventRequestService {
 
     @Override
     public EventRequest cancelEventRequest(Long userId, Long requestId) {
-        EventRequest request = eventRequestRepository.findByIdAndRequesterId(requestId, userId).orElseThrow(
+        EventRequest eventRequest = eventRequestRepository.findByIdAndRequesterId(requestId, userId).orElseThrow(
                 () -> new NotFoundException("Request with id=" + requestId + " was not found"));
-        request.setStatus(EventRequestStatus.CANCELED);
-        return eventRequestRepository.save(request);
+        eventRequest.setStatus(EventRequestStatus.CANCELED);
+        eventRequest = eventRequestRepository.save(eventRequest);
+        log.info("Canceled event request with id={}", requestId);
+        return eventRequest;
     }
 
     @Override
@@ -131,7 +136,9 @@ public class EventRequestServiceImpl implements EventRequestService {
                 confirmedRequests.add(eventRequestRepository.save(e));
             } else {
                 rejectedRequests.add(eventRequestRepository.save(e));
+
             }
+            log.info("Set status={} for event request with id={}", newStatus, e.getId());
         }
 
         return new EventRequestUpdateResult(confirmedRequests, rejectedRequests);

@@ -1,11 +1,11 @@
 package ru.practicum.eventRequest.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 public class EventRequestStatusUpdateResultDto {
     private final Collection<EventRequestDto> confirmedRequests;

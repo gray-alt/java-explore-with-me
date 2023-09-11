@@ -1,13 +1,13 @@
 package ru.practicum.compilation.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import ru.practicum.event.dto.EventShortDto;
 
 import java.util.Collection;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 @Builder
 public class CompilationDto {

@@ -1,7 +1,7 @@
 package ru.practicum.event.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import ru.practicum.event.model.EventStateAction;
 import ru.practicum.location.dto.LocationDto;
@@ -9,7 +9,7 @@ import ru.practicum.location.dto.LocationDto;
 import javax.validation.constraints.Future;
 import java.time.LocalDateTime;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 public class UpdateEventDto {
     @Length(min = 20, max = 2000)

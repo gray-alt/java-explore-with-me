@@ -1,7 +1,7 @@
 package ru.practicum.event.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -20,7 +20,7 @@ import ru.practicum.user.service.UserService;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class EventServiceImpl implements EventService {
@@ -36,7 +36,7 @@ public class EventServiceImpl implements EventService {
         event.setCategory(categoryService.getCategoryById(event.getCategory().getId()));
         event.setLocation(locationService.getLocation(event.getLocation()));
         event = eventRepository.save(event);
-        log.info("Added event " + event.getTitle() + " with id=" + event.getId());
+        log.info("Added event {} with id={}", event.getTitle(), event.getId());
         return event;
     }
 
@@ -67,7 +67,7 @@ public class EventServiceImpl implements EventService {
 
         updateEvent(foundEvent, event);
         foundEvent = eventRepository.save(foundEvent);
-        log.info("Updated event with id=" + foundEvent.getId() + ", " + foundEvent);
+        log.info("Updated event with id={}", eventId);
         return foundEvent;
     }
 
@@ -93,7 +93,7 @@ public class EventServiceImpl implements EventService {
 
         updateEvent(foundEvent, event);
         foundEvent = eventRepository.save(foundEvent);
-        log.info("Admin updated event " + foundEvent.getTitle() + " with id=" + foundEvent.getId());
+        log.info("Admin updated event with id={}", eventId);
         return foundEvent;
     }
 

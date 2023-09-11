@@ -1,6 +1,7 @@
 package ru.practicum.compilation.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.compilation.dto.InputCompilationDto;
@@ -16,7 +17,8 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 @Service
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
@@ -28,6 +30,7 @@ public class CompilationServiceImpl implements CompilationService {
         newCompilation.setEvents(getEventsByIds(compilation.getEvents()));
         newCompilation.setTitle(compilation.getTitle());
         newCompilation.setPinned(compilation.getPinned() != null && compilation.getPinned());
+        log.info("Added compilation {} with id={}", newCompilation.getTitle(), newCompilation.getId());
         return compilationRepository.save(newCompilation);
     }
 
@@ -37,6 +40,7 @@ public class CompilationServiceImpl implements CompilationService {
             throw new NotFoundException("Compilation with id=" + compId + " was not found");
         }
         compilationRepository.deleteById(compId);
+        log.info("Deleted compilation with id={}", compId);
     }
 
     @Override
@@ -54,7 +58,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (compilation.getTitle() != null) {
             foundCompilation.setTitle(compilation.getTitle());
         }
-
+        log.info("Updated compilation with id={}", compId);
         return compilationRepository.save(foundCompilation);
     }
 

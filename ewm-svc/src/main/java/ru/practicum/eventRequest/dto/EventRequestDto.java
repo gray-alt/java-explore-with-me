@@ -1,13 +1,13 @@
 package ru.practicum.eventRequest.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import ru.practicum.eventRequest.model.EventRequestStatus;
 
 import java.time.LocalDateTime;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 @Builder
 public class EventRequestDto {

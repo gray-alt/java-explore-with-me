@@ -1,7 +1,6 @@
 package ru.practicum.controller;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +24,10 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 @RequestMapping()
 @Validated
-@Slf4j
 public class PublicController {
     private final CategoryService categoryService;
     private final EventService eventService;
@@ -41,13 +39,11 @@ public class PublicController {
     public Collection<CompilationDto> getCompilations(@RequestParam(required = false) boolean pinned,
                                                       @RequestParam(defaultValue = "0") int from,
                                                       @RequestParam(defaultValue = "10") int size) {
-        log.info("Public get compilations with pinned=" + pinned);
         return CompilationMapper.mapToCompilationDto(compilationService.getCompilations(pinned, from, size));
     }
 
     @GetMapping("/compilations/{compId}")
     public CompilationDto getCompilation(@PathVariable Long compId) {
-        log.info("Public get compilations with comId=" + compId);
         return CompilationMapper.mapToCompilationDto(compilationService.getCompilationById(compId));
     }
 
@@ -55,13 +51,11 @@ public class PublicController {
     @GetMapping("/categories")
     public Collection<CategoryDto> getCategories(@RequestParam(defaultValue = "0") int from,
                                                  @RequestParam(defaultValue = "10") int size) {
-        log.info("Public get categories");
         return CategoryMapper.mapToCategoryDto(categoryService.getAllCategory(from, size));
     }
 
     @GetMapping("/categories/{catId}")
     public CategoryDto getCategory(@PathVariable Long catId) {
-        log.info("Public get category with catId=" + catId);
         return CategoryMapper.mapToCategoryDto(categoryService.getCategoryById(catId));
     }
 
@@ -84,16 +78,25 @@ public class PublicController {
         if (rangeStart == null && rangeEnd == null) {
             rangeStart = LocalDateTime.now();
         }
-        GetEventRequest request = GetEventRequest.of(null, List.of(EventState.PUBLISHED), categories,
-                rangeStart, rangeEnd, text, paid, onlyAvailable, sort, from, size, httpRequest.getRemoteAddr());
-        log.info("Public get event requests: " + request);
+        GetEventRequest request = GetEventRequest.builder()
+                .states(List.of(EventState.PUBLISHED))
+                .categoryIds(categories)
+                .rangeStart(rangeStart)
+                .rangeEnd(rangeEnd)
+                .text(text)
+                .paid(paid)
+                .available(onlyAvailable)
+                .sort(sort)
+                .from(from)
+                .size(size)
+                .ip(httpRequest.getRemoteAddr())
+                .build();
         return EventMapper.mapToEventShortDto(eventService.getEventsByConditions(request));
     }
 
     @GetMapping("/events/{id}")
     public EventFullDto getEvent(@PathVariable Long id, HttpServletRequest httpRequest) {
         statsClient.createHit("ewm-svc", httpRequest.getRequestURI(), httpRequest.getRemoteAddr());
-        log.info("Public get event with id=" + id);
         return EventMapper.mapToEventFullDto(eventService.getPublicEventById(id, httpRequest.getRemoteAddr()));
     }
 }

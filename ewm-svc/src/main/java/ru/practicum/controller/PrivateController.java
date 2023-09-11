@@ -1,7 +1,6 @@
 package ru.practicum.controller;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +15,10 @@ import ru.practicum.eventRequest.service.EventRequestService;
 import javax.validation.Valid;
 import java.util.Collection;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
 @Validated
-@Slf4j
 public class PrivateController {
     private final EventService eventService;
     private final EventRequestService eventRequestService;
@@ -30,7 +28,6 @@ public class PrivateController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(@PathVariable Long userId,
                                              @RequestBody @Valid NewEventDto newEventDto) {
-        log.info("Private add event by userId=" + userId + ", " + newEventDto.toString());
         return EventMapper.mapToEventFullDto(
                 eventService.addEvent(userId, EventMapper.mapToEvent(newEventDto)));
     }
@@ -39,13 +36,11 @@ public class PrivateController {
     public Collection<EventShortDto> getEvents(@PathVariable Long userId,
                                                @RequestParam(defaultValue = "0") int from,
                                                @RequestParam(defaultValue = "10") int size) {
-        log.info("Private get events by userId=" + userId);
         return EventMapper.mapToEventShortDto(eventService.getAllEventsByUserId(userId, from, size));
     }
 
     @GetMapping("/{userId}/events/{eventId}")
     public EventFullDto getEvent(@PathVariable Long userId, @PathVariable Long eventId) {
-        log.info("Private get events by userId=" + userId + " and eventId=" + eventId);
         return EventMapper.mapToEventFullDto(eventService.getEventByUserIdAndId(userId, eventId));
     }
 
@@ -53,7 +48,6 @@ public class PrivateController {
     public EventFullDto updateEvent(@PathVariable Long userId,
                                    @PathVariable Long eventId,
                                    @RequestBody @Valid UpdateEventDto updateEventDto) {
-        log.info("Private update event by userId=" + userId + ", eventId=" + eventId + ", " + updateEventDto.toString());
         return EventMapper.mapToEventFullDto(
                 eventService.updateEventByInitiator(userId, eventId, EventMapper.mapToEvent(updateEventDto)));
     }
@@ -61,7 +55,6 @@ public class PrivateController {
     @GetMapping("/{userId}/events/{eventId}/requests")
     public Collection<EventRequestDto> getEventRequests(@PathVariable Long userId,
                                                         @PathVariable Long eventId) {
-        log.info("Private get event requests by userId=" + userId + ", eventId=" + eventId);
         return EventRequestMapper.mapToEventRequestDto(
                 eventRequestService.getEventRequestsByUserIdAndEventId(userId, eventId));
     }
@@ -70,8 +63,6 @@ public class PrivateController {
     public EventRequestStatusUpdateResultDto updateEventRequestsStatus(@PathVariable Long userId,
                                                                        @PathVariable Long eventId,
                                                                        @RequestBody @Valid EventRequestStatusUpdateRequestDto requestStatusDto) {
-        log.info("Private update event request by userId=" + userId + ", eventId=" + eventId +
-                ", " + requestStatusDto.toString());
         return EventRequestMapper.mapToEventRequestStatusUpdateResultDto(
                 eventRequestService.confirmEventRequests(userId, eventId, requestStatusDto));
     }
@@ -80,19 +71,16 @@ public class PrivateController {
     @PostMapping("/{userId}/requests")
     @ResponseStatus(HttpStatus.CREATED)
     public EventRequestDto addRequest(@PathVariable Long userId, @RequestParam Long eventId) {
-        log.info("Private add event request: userId=" + userId + ", eventId=" + eventId);
         return EventRequestMapper.mapToEventRequestDto(eventRequestService.addEventRequest(userId, eventId));
     }
 
     @GetMapping("/{userId}/requests")
     public Collection<EventRequestDto> getRequests(@PathVariable Long userId) {
-        log.info("Private get event requests by userId=" + userId);
         return EventRequestMapper.mapToEventRequestDto(eventRequestService.getAllEventRequests(userId));
     }
 
     @PatchMapping("/{userId}/requests/{requestId}/cancel")
     public EventRequestDto cancelRequest(@PathVariable Long userId, @PathVariable Long requestId) {
-        log.info("Private cancel event request by userId=" + userId + ", requestId=" + requestId);
         return EventRequestMapper.mapToEventRequestDto(eventRequestService.cancelEventRequest(userId, requestId));
     }
 }

@@ -1,13 +1,13 @@
 package ru.practicum.compilation.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import java.util.Set;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 public class InputCompilationDto {
     private final Set<Long> events;

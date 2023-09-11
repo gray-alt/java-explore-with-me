@@ -1,6 +1,6 @@
 package ru.practicum.user.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,7 @@ import ru.practicum.user.repository.UserRepository;
 
 import java.util.Collection;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
             throw new ConflictException("User with name " + user.getName() + " is already exist");
         }
         user = userRepository.save(user);
-        log.info("Added user " + user.getName() + " with id=" + user.getId());
+        log.info("Added user {} with id={}", user.getName(), user.getId());
         return user;
     }
 
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserById(Long userId) {
         userRepository.deleteById(userId);
-        log.info("Added user with id=" + userId);
+        log.info("Deleted user with id={}", userId);
     }
 
     @Override

@@ -1,14 +1,14 @@
 package ru.practicum.event.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 @Builder
 public class EventShortDto {
