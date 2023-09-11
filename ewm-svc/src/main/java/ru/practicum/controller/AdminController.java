@@ -70,7 +70,7 @@ public class AdminController {
                                               @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                               @RequestParam(defaultValue = "0") int from,
                                               @RequestParam(defaultValue = "10") int size) {
-        GetEventRequest request =GetEventRequest.builder()
+        GetEventRequest request = GetEventRequest.builder()
                 .userIds(users)
                 .states(states)
                 .categoryIds(categories)
