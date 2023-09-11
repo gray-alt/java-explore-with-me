@@ -1,6 +1,7 @@
 package ru.practicum.event.model;
 
 import lombok.*;
+import ru.practicum.location.model.Location;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -16,6 +17,8 @@ public class GetEventRequest {
     private Collection<Long> categoryIds;
     private LocalDateTime rangeStart;
     private LocalDateTime rangeEnd;
+    private Collection<Long> locationIds;
+    private Location searchLocation;
     private String text;
     private Boolean paid;
     private Boolean available;
@@ -38,6 +41,10 @@ public class GetEventRequest {
 
     public boolean hasRange() {
         return rangeStart != null || rangeEnd != null;
+    }
+
+    public boolean hasLocationIds() {
+        return locationIds != null && !locationIds.isEmpty();
     }
 
     @Override

@@ -18,6 +18,9 @@ import ru.practicum.event.model.EventSort;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.model.GetEventRequest;
 import ru.practicum.event.service.EventService;
+import ru.practicum.location.dto.LocationDto;
+import ru.practicum.location.dto.LocationMapper;
+import ru.practicum.location.service.LocationService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -26,13 +29,14 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping()
+@RequestMapping
 @Validated
 public class PublicController {
     private final CategoryService categoryService;
     private final EventService eventService;
     private final CompilationService compilationService;
     private final StatsClient statsClient;
+    private final LocationService locationService;
 
     // ПОДБОРКА СОБЫТИЙ
     @GetMapping("/compilations")
@@ -70,6 +74,8 @@ public class PublicController {
                                                @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                                @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                                @RequestParam(defaultValue = "EVENT_DATE") EventSort sort,
+                                               @RequestParam(required = false) Collection<Long> locations,
+                                               @RequestBody(required = false) LocationDto searchLocation,
                                                @RequestParam(defaultValue = "0") int from,
                                                @RequestParam(defaultValue = "10") int size,
                                                HttpServletRequest httpRequest) {
@@ -90,6 +96,8 @@ public class PublicController {
                 .from(from)
                 .size(size)
                 .ip(httpRequest.getRemoteAddr())
+                .locationIds(locations)
+                .searchLocation(LocationMapper.mapToLocation(searchLocation))
                 .build();
         return EventMapper.mapToEventShortDto(eventService.getEventsByConditions(request));
     }
@@ -98,5 +106,17 @@ public class PublicController {
     public EventFullDto getEvent(@PathVariable Long id, HttpServletRequest httpRequest) {
         statsClient.createHit("ewm-svc", httpRequest.getRequestURI(), httpRequest.getRemoteAddr());
         return EventMapper.mapToEventFullDto(eventService.getPublicEventById(id, httpRequest.getRemoteAddr()));
+    }
+
+    // ЛОКАЦИИ
+    @GetMapping("/locations")
+    public Collection<LocationDto> getLocations(@RequestParam(defaultValue = "0") int from,
+                                                @RequestParam(defaultValue = "10") int size) {
+        return LocationMapper.mapToLocationDto(locationService.getAllLocations(from, size));
+    }
+
+    @GetMapping("/locations/{locId}")
+    public LocationDto getLocations(@PathVariable Long locId) {
+        return LocationMapper.mapToLocationDto(locationService.getLocationById(locId));
     }
 }

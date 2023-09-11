@@ -34,7 +34,7 @@ public class EventServiceImpl implements EventService {
         checkEventDate(event.getEventDate(), LocalDateTime.now().plusHours(2));
         event.setInitiator(userService.getUserById(userId));
         event.setCategory(categoryService.getCategoryById(event.getCategory().getId()));
-        event.setLocation(locationService.getLocation(event.getLocation()));
+        event.setLocation(locationService.getLocationByCoordinates(event.getLocation()));
         event = eventRepository.save(event);
         log.info("Added event {} with id={}", event.getTitle(), event.getId());
         return event;
@@ -120,7 +120,7 @@ public class EventServiceImpl implements EventService {
             foundEvent.setEventDate(event.getEventDate());
         }
         if (event.getLocation() != null) {
-            foundEvent.setLocation(locationService.getLocation(event.getLocation()));
+            foundEvent.setLocation(locationService.getLocationByCoordinates(event.getLocation()));
         }
         if (event.getPaid() != null) {
             foundEvent.setPaid(event.getPaid());
@@ -177,6 +177,16 @@ public class EventServiceImpl implements EventService {
         }
         if (request.getAvailable() != null && request.getAvailable()) {
             conditions.add(event.eventRequests.any().eq("CONFIRMED").count().lt(event.participantLimit));
+        }
+        if (request.hasLocationIds()) {
+            conditions.add(event.location.id.in(request.getLocationIds()));
+        }
+        if (request.getSearchLocation() != null) {
+            if (request.getSearchLocation().isMyLocation()) {
+                conditions.add(event.location.in(locationService.getLocationsInCoordinates(request.getSearchLocation())));
+            } else {
+                conditions.add(event.location.in(locationService.getLocationsInRadius(request.getSearchLocation())));
+            }
         }
 
         int page = request.getFrom() > 0 ? request.getFrom() / request.getSize() : 0;
