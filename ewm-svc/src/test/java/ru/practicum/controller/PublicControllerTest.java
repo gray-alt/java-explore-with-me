@@ -51,7 +51,7 @@ public class PublicControllerTest {
             .build());
 
     @Test
-    void getLocations() throws Exception{
+    void getLocations() throws Exception {
         when(locationService.getAllLocations(anyInt(), anyInt()))
                 .thenReturn(locations);
 
@@ -67,7 +67,7 @@ public class PublicControllerTest {
     }
 
     @Test
-    void getLocationById() throws Exception{
+    void getLocationById() throws Exception {
         when(locationService.getLocationById(anyLong()))
                 .thenReturn(locations.get(0));
 
