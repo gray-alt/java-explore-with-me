@@ -11,9 +11,9 @@ import java.util.Optional;
 public interface LocationRepository extends JpaRepository<Location, Long> {
     Optional<Location> findByLatAndLon(Double lat, Double lon);
 
-    Boolean existsByLatAndLon(Double lat, Double lon);
+    boolean existsByLatAndLon(Double lat, Double lon);
 
-    Boolean existsByLatAndLonAndIdNot(Double lat, Double lon, Long id);
+    boolean existsByLatAndLonAndIdNot(Double lat, Double lon, Long id);
 
     @Query(value = "select loc " +
             "from Location loc " +

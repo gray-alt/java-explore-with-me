@@ -116,7 +116,7 @@ public class PublicController {
     }
 
     @GetMapping("/locations/{locId}")
-    public LocationDto getLocations(@PathVariable Long locId) {
+    public LocationDto getLocation(@PathVariable Long locId) {
         return LocationMapper.mapToLocationDto(locationService.getLocationById(locId));
     }
 }

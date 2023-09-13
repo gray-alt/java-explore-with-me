@@ -20,5 +20,5 @@ public class LocationDto {
     @Length(min = 3, max = 255)
     private final String name;
     private final Double radius;
-    private final boolean myLocation;
+    private final boolean itMyLocation;
 }

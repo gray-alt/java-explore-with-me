@@ -17,7 +17,7 @@ public class LocationMapper {
                 .lat(locationDto.getLat())
                 .name(locationDto.getName())
                 .radius(locationDto.getRadius() == null ? 0 : locationDto.getRadius())
-                .myLocation(locationDto.isMyLocation())
+                .itMyLocation(locationDto.isItMyLocation())
                 .build();
     }
 

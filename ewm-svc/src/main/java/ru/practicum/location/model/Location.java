@@ -1,7 +1,6 @@
 package ru.practicum.location.model;
 
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 
@@ -18,9 +17,8 @@ public class Location {
     private Long id;
     private Double lat;
     private Double lon;
-    @Length(min = 3, max = 255)
     private String name;
     private Double radius;
     @Transient
-    private boolean myLocation;
+    private boolean itMyLocation;
 }

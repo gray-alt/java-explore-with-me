@@ -11,8 +11,6 @@ public interface LocationService {
 
     Location getLocationByCoordinates(Location location);
 
-    Collection<Location> getLocationsInRadius(Location location);
-
     Collection<Location> getLocationsInCoordinates(Location location);
 
     Location getLocationById(Long locId);

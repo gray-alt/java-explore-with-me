@@ -182,11 +182,7 @@ public class EventServiceImpl implements EventService {
             conditions.add(event.location.id.in(request.getLocationIds()));
         }
         if (request.getSearchLocation() != null) {
-            if (request.getSearchLocation().isMyLocation()) {
-                conditions.add(event.location.in(locationService.getLocationsInCoordinates(request.getSearchLocation())));
-            } else {
-                conditions.add(event.location.in(locationService.getLocationsInRadius(request.getSearchLocation())));
-            }
+            conditions.add(event.location.in(locationService.getLocationsInCoordinates(request.getSearchLocation())));
         }
 
         int page = request.getFrom() > 0 ? request.getFrom() / request.getSize() : 0;

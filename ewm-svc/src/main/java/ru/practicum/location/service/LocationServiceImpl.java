@@ -36,16 +36,17 @@ public class LocationServiceImpl implements LocationService {
     public Location updateLocation(Long locId, Location location) {
         Location foundLocation = locationRepository.findById(locId).orElseThrow(
                 () -> new NotFoundException("Not found location with id=" + locId));
-        if (location.getLat() != null) {
-            foundLocation.setLat(location.getLat());
-        }
-        if (location.getLon() != null) {
-            foundLocation.setLon(location.getLon());
-        }
-        if (locationRepository.existsByLatAndLonAndIdNot(foundLocation.getLat(), foundLocation.getLon(), locId)) {
+
+        double lat = location.getLat() == null ? foundLocation.getLat() : location.getLat();
+        double lon = location.getLon() == null ? foundLocation.getLon() : location.getLon();
+
+        if (locationRepository.existsByLatAndLonAndIdNot(lat, lon, locId)) {
             throw new ConflictException("Location already exist with lat=" + location.getLat() +
                     " and lon=" + location.getLon());
         }
+        foundLocation.setLat(lat);
+        foundLocation.setLon(lon);
+
         if (location.getName() != null) {
             foundLocation.setName(location.getName());
         }
@@ -77,12 +78,10 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public Collection<Location> getLocationsInRadius(Location location) {
-        return locationRepository.findAllInRadius(location.getLat(), location.getLon(), location.getRadius());
-    }
-
-    @Override
     public Collection<Location> getLocationsInCoordinates(Location location) {
-        return locationRepository.findAllInCoordinates(location.getLat(), location.getLon());
+        if (location.isItMyLocation()) {
+            return locationRepository.findAllInCoordinates(location.getLat(), location.getLon());
+        }
+        return locationRepository.findAllInRadius(location.getLat(), location.getLon(), location.getRadius());
     }
 }
