@@ -19,6 +19,9 @@ import ru.practicum.event.dto.UpdateEventDto;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.model.GetEventRequest;
 import ru.practicum.event.service.EventService;
+import ru.practicum.location.dto.LocationDto;
+import ru.practicum.location.dto.LocationMapper;
+import ru.practicum.location.service.LocationService;
 import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.dto.UserMapper;
 import ru.practicum.user.service.UserService;
@@ -36,6 +39,7 @@ public class AdminController {
     private final UserService userService;
     private final EventService eventService;
     private final CompilationService compilationService;
+    private final LocationService locationService;
 
     // КАТЕГОРИИ
     @PostMapping("/categories")
@@ -127,5 +131,19 @@ public class AdminController {
     public CompilationDto updateCompilation(@PathVariable Long compId,
                                             @RequestBody @Valid UpdateCompilationDto updateCompilationDto) {
         return CompilationMapper.mapToCompilationDto(compilationService.updateCompilation(compId, updateCompilationDto));
+    }
+
+    // ЛОКАЦИИ
+    @PostMapping("/locations")
+    @ResponseStatus(HttpStatus.CREATED)
+    public LocationDto addLocation(@RequestBody @Valid LocationDto locationDto) {
+        return LocationMapper.mapToLocationDto(
+                locationService.addLocation(LocationMapper.mapToLocation(locationDto)));
+    }
+
+    @PatchMapping("/locations/{locId}")
+    public LocationDto updateLocation(@PathVariable Long locId, @RequestBody LocationDto locationDto) {
+        return LocationMapper.mapToLocationDto(
+                locationService.updateLocation(locId, LocationMapper.mapToLocation(locationDto)));
     }
 }

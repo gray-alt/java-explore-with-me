@@ -17,4 +17,8 @@ public class Location {
     private Long id;
     private Double lat;
     private Double lon;
+    private String name;
+    private Double radius;
+    @Transient
+    private boolean itMyLocation;
 }
